@@ -152,6 +152,12 @@ jobs:
             --build-arg VAST_BASE=${{ matrix.base_image }} \
             --build-arg INSTALL_BLENDER=false \
             --build-arg INSTALL_GPU_BENCHMARKS=false \
+            --build-arg INSTALL_CJK=false \
+            --build-arg INSTALL_SPELLCHECK=false \
+            --build-arg INSTALL_OKULAR=false \
+            --build-arg INSTALL_KDE_EXTRAS=false \
+            --build-arg INSTALL_VLC=false \
+            --build-arg INSTALL_LIBREOFFICE=false \
             -t ${{ env.FULL_IMAGE }} \
             . --push
 

@@ -49,8 +49,6 @@ RUN \
         fonts-hack \
         fonts-liberation \
         fonts-noto \
-        fonts-noto-cjk \
-        fonts-noto-cjk-extra \
         fonts-noto-color-emoji \
         fonts-noto-extra \
         fonts-noto-hinted \
@@ -304,8 +302,6 @@ RUN \
     adwaita-icon-theme-full \
     appmenu-gtk3-module \
     ark \
-    aspell \
-    aspell-en \
     breeze \
     breeze-cursor-theme \
     breeze-gtk-theme \
@@ -315,7 +311,6 @@ RUN \
     desktop-file-utils \
     dolphin \
     dolphin-plugins \
-    enchant-2 \
     fcitx \
     fcitx-frontend-gtk2 \
     fcitx-frontend-gtk3 \
@@ -328,13 +323,10 @@ RUN \
     fcitx-hangul \
     fcitx-libpinyin \
     fcitx-m17n \
-    fcitx-mozc \
     fcitx-sayura \
     fcitx-unikey \
-    filelight \
     frameworkintegration \
     gwenview \
-    hunspell \
     im-config \
     kwrite \
     kcalc \
@@ -343,25 +335,18 @@ RUN \
     kde-config-fcitx \
     kde-config-gtk-style \
     kde-config-gtk-style-preview \
-    kdeconnect \
     kdegraphics-thumbnailers \
     kde-spectacle \
-    kdf \
     kdialog \
     kfind \
-    kget \
     khotkeys \
     kimageformat-plugins \
     kinfocenter \
     kio \
     kio-extras \
-    kmag \
     kmenuedit \
     kmix \
-    kmousetool \
-    kmouth \
     ksshaskpass \
-    ktimer \
     kwin-addons \
     kwin-x11 \
     libdbusmenu-glib4 \
@@ -379,12 +364,8 @@ RUN \
     libpam0g \
     libpam-modules \
     libqt5multimedia5-plugins \
-    libreoffice \
     librsvg2-common \
     media-player-info \
-    okular \
-    okular-extra-backends \
-    plasma-browser-integration \
     plasma-calendar-addons \
     plasma-dataengines-addons \
     plasma-integration \
@@ -398,20 +379,104 @@ RUN \
     qt5-gtk-platformtheme \
     qt5-image-formats-plugins \
     qt5-style-plugins \
-    qtspeech5-flite-plugin \
     qtvirtualkeyboard-plugin \
     software-properties-qt \
-    sonnet-plugins \
-    sweeper \
     systemsettings \
-    ubuntu-drivers-common \
-    vlc \
-    vlc-plugin-access-extra \
-    vlc-plugin-notify \
-    vlc-plugin-samba \
-    vlc-plugin-skins2 \
-    vlc-plugin-video-splitter \
-    vlc-plugin-visualization
+    ubuntu-drivers-common
+
+# CJK fonts and input method
+# Set INSTALL_CJK=false to skip (used by slim variant)
+ARG INSTALL_CJK=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_CJK" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y \
+            fonts-noto-cjk \
+            fonts-noto-cjk-extra \
+            fcitx-mozc; \
+    else \
+        echo "Skipping CJK installation (INSTALL_CJK=false)"; \
+    fi
+
+# Spell checking
+# Set INSTALL_SPELLCHECK=false to skip (used by slim variant)
+ARG INSTALL_SPELLCHECK=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_SPELLCHECK" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y \
+            aspell \
+            aspell-en \
+            enchant-2 \
+            hunspell \
+            sonnet-plugins; \
+    else \
+        echo "Skipping spell check installation (INSTALL_SPELLCHECK=false)"; \
+    fi
+
+# Okular document viewer
+# Set INSTALL_OKULAR=false to skip (used by slim variant)
+ARG INSTALL_OKULAR=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_OKULAR" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y \
+            okular \
+            okular-extra-backends; \
+    else \
+        echo "Skipping Okular installation (INSTALL_OKULAR=false)"; \
+    fi
+
+# KDE extra utilities (accessories not needed for core desktop use)
+# Set INSTALL_KDE_EXTRAS=false to skip (used by slim variant)
+ARG INSTALL_KDE_EXTRAS=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_KDE_EXTRAS" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y \
+            filelight \
+            kdeconnect \
+            kdf \
+            kget \
+            kmag \
+            kmousetool \
+            kmouth \
+            ktimer \
+            plasma-browser-integration \
+            qtspeech5-flite-plugin \
+            sweeper; \
+    else \
+        echo "Skipping KDE extras installation (INSTALL_KDE_EXTRAS=false)"; \
+    fi
+
+# VLC media player
+# Set INSTALL_VLC=false to skip (used by slim variant)
+ARG INSTALL_VLC=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_VLC" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y \
+            vlc \
+            vlc-plugin-access-extra \
+            vlc-plugin-notify \
+            vlc-plugin-samba \
+            vlc-plugin-skins2 \
+            vlc-plugin-video-splitter \
+            vlc-plugin-visualization; \
+    else \
+        echo "Skipping VLC installation (INSTALL_VLC=false)"; \
+    fi
+
+# LibreOffice
+# Set INSTALL_LIBREOFFICE=false to skip (used by slim variant)
+ARG INSTALL_LIBREOFFICE=true
+RUN \
+    set -euo pipefail && \
+    if [ "$INSTALL_LIBREOFFICE" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y libreoffice; \
+    else \
+        echo "Skipping LibreOffice installation (INSTALL_LIBREOFFICE=false)"; \
+    fi
 
 # Google Chrome
 RUN \
