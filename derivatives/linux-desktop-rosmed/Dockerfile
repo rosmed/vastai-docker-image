@@ -41,9 +41,7 @@ RUN apt-get install -y software-properties-common \
 #
 RUN apt-get update \
     && apt-get install -y ros-dev-tools \
-    && apt-get upgrade -y \
     && apt-get install -y ros-jazzy-desktop \
-    && apt-get install -y ros-jazzy-ros-base \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #
