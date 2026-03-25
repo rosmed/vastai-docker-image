@@ -1,4 +1,4 @@
-ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-24-slim
+ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-25-slim
 
 FROM ${VAST_BASE}
 
