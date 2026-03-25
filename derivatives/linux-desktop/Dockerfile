@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     wget https://downloads.apache.org/guacamole/1.5.5/source/guacamole-server-1.5.5.tar.gz && \
     tar -xvf guacamole-server-1.5.5.tar.gz && \
     cd guacamole-server-1.5.5 && \
-    ./configure && make && make install DESTDIR=/guacamole-install
+    ./configure && make && make install DESTDIR=/guacamole-install && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM ${VAST_BASE}
 
@@ -170,7 +171,8 @@ RUN \
     else \
         apt-get install --no-install-recommends -y "${BASE_PACKAGES[@]}"; \
     fi && \
-    ln -s /usr/share/novnc/vnc.html /usr/share/novnc/index.html
+    ln -s /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Vulkan & EGL fallback configs for NVIDIA.
 # The NVIDIA Container Toolkit bind-mounts its own versions of these files at
@@ -199,7 +201,8 @@ RUN \
         chmod -f u+s /usr/lib32/libvglfaker.so /usr/lib32/libvglfaker-nodl.so /usr/lib32/libvglfaker-opencl.so /usr/lib32/libdlfaker.so /usr/lib32/libgefaker.so && \
         chmod -f u+s /usr/lib/i386-linux-gnu/libvglfaker.so /usr/lib/i386-linux-gnu/libvglfaker-nodl.so /usr/lib/i386-linux-gnu/libvglfaker-opencl.so /usr/lib/i386-linux-gnu/libdlfaker.so /usr/lib/i386-linux-gnu/libgefaker.so; \
     fi && \
-    rm -f /tmp/virtualgl*
+    rm -f /tmp/virtualgl* && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # NVIDIA VAAPI (install build-only deps here, cleaned up after Selkies)
 RUN \
@@ -218,6 +221,7 @@ RUN \
     meson setup build && \
     meson install -C build && \
     rm -rf /tmp/* && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
@@ -230,7 +234,8 @@ RUN \
     cd /opt && curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/gstreamer-selkies_gpl_v${SELKIES_VERSION}_ubuntu$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"')_$(dpkg --print-architecture).tar.gz" | tar -xzf - && \
     cd /tmp && curl -O -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && /usr/bin/pip3 install --no-cache-dir --force-reinstall "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" "websockets<14.0" && rm -f "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && \
     cd /opt && curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-web_v${SELKIES_VERSION}.tar.gz" | tar -xzf - && \
-    cd /tmp && curl -o selkies-js-interposer.deb -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-js-interposer_v${SELKIES_VERSION}_ubuntu$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"')_$(dpkg --print-architecture).deb" && apt-get update && apt-get install --no-install-recommends -y ./selkies-js-interposer.deb && rm -f selkies-js-interposer.deb
+    cd /tmp && curl -o selkies-js-interposer.deb -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-js-interposer_v${SELKIES_VERSION}_ubuntu$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '\"')_$(dpkg --print-architecture).deb" && apt-get update && apt-get install --no-install-recommends -y ./selkies-js-interposer.deb && rm -f selkies-js-interposer.deb && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clean up build-only packages installed for NVIDIA VAAPI
 RUN apt-get purge -y --auto-remove \
@@ -290,7 +295,8 @@ RUN \
     echo "noauth-config: /etc/guacamole/noauth-config.xml" >> /etc/guacamole/guacamole.properties && \
     touch /etc/guacamole/noauth-config.xml && \
     chown -R tomcat:tomcat /etc/guacamole && \
-    chmod -R 755 /etc/guacamole
+    chmod -R 755 /etc/guacamole && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install DE
 RUN \
@@ -382,7 +388,8 @@ RUN \
     qtvirtualkeyboard-plugin \
     software-properties-qt \
     systemsettings \
-    ubuntu-drivers-common
+    ubuntu-drivers-common && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # CJK fonts and input method
 # Set INSTALL_CJK=false to skip (used by slim variant)
@@ -393,7 +400,8 @@ RUN \
         apt-get update && apt-get install --no-install-recommends -y \
             fonts-noto-cjk \
             fonts-noto-cjk-extra \
-            fcitx-mozc; \
+            fcitx-mozc && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping CJK installation (INSTALL_CJK=false)"; \
     fi
@@ -409,7 +417,8 @@ RUN \
             aspell-en \
             enchant-2 \
             hunspell \
-            sonnet-plugins; \
+            sonnet-plugins && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping spell check installation (INSTALL_SPELLCHECK=false)"; \
     fi
@@ -422,7 +431,8 @@ RUN \
     if [ "$INSTALL_OKULAR" = "true" ]; then \
         apt-get update && apt-get install --no-install-recommends -y \
             okular \
-            okular-extra-backends; \
+            okular-extra-backends && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping Okular installation (INSTALL_OKULAR=false)"; \
     fi
@@ -444,7 +454,8 @@ RUN \
             ktimer \
             plasma-browser-integration \
             qtspeech5-flite-plugin \
-            sweeper; \
+            sweeper && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping KDE extras installation (INSTALL_KDE_EXTRAS=false)"; \
     fi
@@ -462,7 +473,8 @@ RUN \
             vlc-plugin-samba \
             vlc-plugin-skins2 \
             vlc-plugin-video-splitter \
-            vlc-plugin-visualization; \
+            vlc-plugin-visualization && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping VLC installation (INSTALL_VLC=false)"; \
     fi
@@ -473,7 +485,8 @@ ARG INSTALL_LIBREOFFICE=true
 RUN \
     set -euo pipefail && \
     if [ "$INSTALL_LIBREOFFICE" = "true" ]; then \
-        apt-get update && apt-get install --no-install-recommends -y libreoffice; \
+        apt-get update && apt-get install --no-install-recommends -y libreoffice && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Skipping LibreOffice installation (INSTALL_LIBREOFFICE=false)"; \
     fi
@@ -484,7 +497,8 @@ RUN \
     curl -o google-chrome-stable.deb -fsSL "https://dl.google.com/linux/direct/google-chrome-stable_current_$(dpkg --print-architecture).deb" && \
     apt-get install -y ./google-chrome-stable.deb && \
     update-alternatives --install /usr/bin/google-chrome-stable google-chrome-stable /usr/local/bin/google-chrome 100 && \
-    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+    update-alternatives --set x-www-browser /usr/bin/google-chrome-stable && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Blender - version passed via build arg, or auto-detected if empty
 # Set INSTALL_BLENDER=false to skip (used by slim variant)
@@ -519,6 +533,7 @@ RUN \
     set -euo pipefail && \
     if [ "$INSTALL_GPU_BENCHMARKS" = "true" ]; then \
         apt-get update && apt-get install --no-install-recommends -y glmark2 && \
+        apt-get clean && rm -rf /var/lib/apt/lists/* && \
         cd /tmp && \
         wget -O Unigine_Heaven-4.0.run https://assets.unigine.com/d/Unigine_Heaven-4.0.run && \
         chmod +x Unigine_Heaven-4.0.run && \
