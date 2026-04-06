@@ -1,6 +1,4 @@
 ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-25-slim
-ARG SLICER_MAJOR_VER=5.10
-ARG SLICER_MINOR_VER=0
 
 FROM ${VAST_BASE}
 
@@ -125,7 +123,7 @@ WORKDIR /home/user
 #
 RUN mkdir /home/user/slicer \
     && cd /home/user/slicer \
-    && git clone --branch v${SLICER_MAJOR_VER}.${SLICER_MINOR_VER} https://github.com/slicer/Slicer \
+    && git clone --branch v5.10.0 https://github.com/slicer/Slicer \
     && mkdir Slicer-SuperBuild-Release \
     && cd Slicer-SuperBuild-Release \
     && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_USE_SYSTEM_OpenSSL=ON ../Slicer \
