@@ -49,6 +49,7 @@ RUN apt-get update \
 #
 RUN apt-get update \
     && apt-get install -y \
+        python3-numpy \
         python3-vcstool \
         python3-colcon-common-extensions \
         python3-pykdl \
@@ -74,6 +75,7 @@ RUN apt-get update \
         ros-jazzy-xacro \
         ros-jazzy-object-recognition-msgs \
         ros-jazzy-moveit \
+        ros-jazzy-ros-gz \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #
@@ -85,15 +87,6 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc
 ################################################################################
 # Libraries for ISMR 2021 Tutorial
 ################################################################################
-
-#WORKDIR /home/user
-#RUN mkdir igtl \
-#    && cd igtl \
-#    && git clone https://github.com/openigtlink/OpenIGTLink \
-#    && mkdir OpenIGTLink-build \
-#    && cd OpenIGTLink-build \
-#    && cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=ON ../OpenIGTLink \
-#    && make
 
 #
 # Prerequisite for 3D Slicer
@@ -112,11 +105,22 @@ RUN apt-get update \
         libssl-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+#WORKDIR /home/user
+#USER user
+#RUN mkdir igtl \
+#    && cd igtl \
+#    && git clone https://github.com/openigtlink/OpenIGTLink \
+#    && mkdir OpenIGTLink-build \
+#    && cd OpenIGTLink-build \
+#    && cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=ON ../OpenIGTLink \
+#    && make
+
 ################################################################################
 # 3D Slicer for ISMR 2021 Tutorial
 ################################################################################
 
 WORKDIR /home/user
+USER user
 
 #
 # Build 3D Slicer
@@ -135,6 +139,7 @@ RUN mkdir /home/user/slicer \
 ################################################################################
 
 WORKDIR /home/user
+USER user
 
 #
 # SlicerOpenIGTLink
@@ -155,12 +160,14 @@ RUN mkdir -p /home/user/slicer/modules \
 # Use -DSlicerIGSIO_USE_GPU=OFF (not IGSIO_USE_GPU_RECONSTRUCT which doesn't exist).
 # The CUDA base image provides OpenCL so SlicerIGSIO_USE_GPU defaults to ON unless explicitly disabled.
 
+#USER root
 #RUN apt update \
 #    && apt install -y opencl-clhpp-headers \
 #    && apt install -y opencl-headers \
 #    && apt install -y ocl-icd-libopencl1 \
 #    && apt install -y ocl-icd-opencl-dev
 #RUN apt update && apt install -y nvidia-opencl-dev
+#USER user
 
 RUN mkdir -p /home/user/slicer/modules \
     && cd /home/user/slicer/modules \
@@ -196,6 +203,9 @@ RUN mkdir -p /home/user/slicer/modules \
 ################################################################################
 # Build packages
 ################################################################################
+
+WORKDIR /home/user
+USER user
 
 #
 # Slicer Package
@@ -244,21 +254,9 @@ RUN cd /home/user/slicer/modules \
     && mkdir -p /home/user/slicer/packages \
     && mv *.tar.gz /home/user/slicer/packages
 
-
-
-## Following will address an issue related to deprecated pkg_resources
-#RUN apt install -y python3-pip \
-#    && pip install --upgrade --break-system-packages setuptools==66.1.1
-#
-#WORKDIR /home/user
-#RUN mkdir -p /home/user/ros2_ws/src \
-#    && cd /home/user/ros2_ws/src \
-#    && /bin/bash -c 'source /opt/ros/jazzy/setup.sh; vcs import --input https://raw.githubusercontent.com/jhu-dvrk/dvrk_robot_ros2/main/dvrk.vcs --recursive'
-
 #
 # Build SlicerROS2
 #
-WORKDIR /home/user
 RUN mkdir -p /home/user/ros2_ws/src \
     && cd /home/user/ros2_ws/src \
     #&& git clone https://github.com/jhu-cisst/ros2_cisst_msgs.git cisst_msgs \ # Installed as part of dVRK/ciasst
@@ -270,7 +268,6 @@ RUN mkdir -p /home/user/ros2_ws/src \
 #
 # Package SlicerROS2
 #
-WORKDIR /home/user
 RUN mkdir -p /home/user/slicer/ \
     && mkdir -p /home/user/slicer/packages \
     && cd /home/user/slicer/packages \
@@ -281,14 +278,17 @@ RUN mkdir -p /home/user/slicer/ \
 ## Install 3D Slicer Extensions
 ##
 WORKDIR /home/user
+USER user
 COPY slicer/install-extension.py /home/user/slicer
 COPY slicer/install-module.py /home/user/slicer
 COPY slicer/start-slicer-ros2.bash /home/user
 COPY slicer/setup-slicer.bash /home/user
 
 WORKDIR /home/user
+USER root
 RUN cd /home/user \
     && chmod 755 start-slicer-ros2.bash \
     && chmod 755 setup-slicer.bash
 
-#RUN /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py'
+USER user
+RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py; exit 0'
